@@ -1,0 +1,61 @@
+Route::post('/change-job-status-by-admin',[JobController::class,'changeStatus'])->name('job.change.status');
+
+
+
+    // Change status
+public function changeStatus(Request $request)
+{
+    // Find the job by ID or fail
+    $job = Job::findOrFail($request->id);
+
+    try {
+        // Update the status of the job
+        $job->status = $request->status;
+        $job->save();
+
+        return response()->json(['success' => true, 'message' => 'Status updated successfully.']);
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+    }
+}
+
+
+
+
+
+<script>
+    var statusChange=document.querySelectorAll('.status-change');
+    statusChange.forEach(function(select){
+       select.addEventListener("change",function(){
+         var jobId=this.getAttribute("data-id") ;
+         var status=this.value;
+        //  alert(jobId+status);
+        
+         $.ajax({
+                    type: "POST",
+                    url: "/change-job-status-by-admin", // Laravel route
+                    data: {
+                        id: jobId, // Contact ID
+                        status: status, 
+                        _token: $('meta[name="csrf-token"]').attr('content'),
+                            contentType: false,
+                            processData: false,
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            alert(response.message); 
+                            location.reload();
+                        } else {
+                            alert("Error updating status");
+                            location.reload();
+                        }
+                    },
+                    error: function (response) {
+                        alert("An error occurred: " + response.responseJSON.error);
+                    }
+                });
+        
+       });
+        
+    });
+    </script>
